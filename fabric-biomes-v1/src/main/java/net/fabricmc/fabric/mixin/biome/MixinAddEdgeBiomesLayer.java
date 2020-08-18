@@ -26,7 +26,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.layer.AddEdgeBiomesLayer;
 import net.minecraft.world.biome.layer.util.LayerRandomnessSource;
 
-import net.fabricmc.fabric.api.biomes.v1.OverworldBiomes;
+import net.fabricmc.fabric.api.biomes.v2.OverworldBiomes;
 import net.fabricmc.fabric.impl.biome.InternalBiomeData;
 import net.fabricmc.fabric.impl.biome.InternalBiomeUtils;
 

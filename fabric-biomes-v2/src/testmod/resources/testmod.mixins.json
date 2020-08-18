@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.fabricmc.fabric.test.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "server": [
+    "ServerMainMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

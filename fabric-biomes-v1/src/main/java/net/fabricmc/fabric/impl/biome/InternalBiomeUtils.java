@@ -27,7 +27,7 @@ import net.minecraft.world.biome.layer.util.LayerRandomnessSource;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.gen.GeneratorOptions;
 
-import net.fabricmc.fabric.api.biomes.v1.OverworldClimate;
+import net.fabricmc.fabric.api.biomes.v2.OverworldClimate;
 import net.fabricmc.fabric.mixin.biome.DimensionOptionsAccessor;
 import net.fabricmc.fabric.mixin.biome.DimensionTypeAccessor;
 

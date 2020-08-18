@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "net.fabricmc.fabric.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "registry.DynamicRegistryManagerAccessor",
+    "registry.DynamicRegistryManagerMixin",
+    "registry.RegistryOpsMixin",
+    "biome.SpawnDensityAccessor",
+    "biome.SpawnSettingsAccessor",
+    "biome.BiomeEffectsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

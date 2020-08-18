@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.api.biomes.v2;
+package net.fabricmc.fabric.test.biome;
 
-/**
- * Represents the climates of biomes on the overworld continents.
- */
-public enum OverworldClimate {
-	/**
-	 * Includes Snowy Tundra (with a weight of 3) and Snowy Taiga (with a weight of 1).
-	 */
-	SNOWY,
+import net.fabricmc.api.ModInitializer;
 
-	/**
-	 * Includes Forest, Taiga, Mountains, and Plains (all with weights of 1).
-	 */
-	COOL,
+public class FabricBiomeTest implements ModInitializer {
+	public static final String MOD_ID = "fabric-biome-api-v1-testmod";
 
-	/**
-	 * Includes Forest, Dark Forest, Mountains, Plains, Birch Forest, and Swamp (all with weights of 1).
-	 */
-	TEMPERATE,
-
-	/**
-	 * Includes Desert (with a weight of 3), Savanna (with a weight of 2), and Plains (with a weight of 1).
-	 */
-	DRY
+	@Override
+	public void onInitialize() {
+		/*BiomeLoadingCallback.EVENT.register((biomeRegistryKey, biomeBuilder) -> {
+			if(BiomeKeys.PLAINS.equals(biomeRegistryKey)) {
+				biomeBuilder.structureFeature(() -> ConfiguredStructureFeatures.DESERT_PYRAMID);
+			}
+		});*/
+	}
 }

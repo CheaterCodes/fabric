@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.api.biomes.v1;
+package net.fabricmc.fabric.api.biomes.v2;
 
 import net.minecraft.world.biome.Biome;
 

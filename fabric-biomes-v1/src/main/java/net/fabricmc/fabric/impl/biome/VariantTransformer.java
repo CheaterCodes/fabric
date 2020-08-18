@@ -24,7 +24,7 @@ import java.util.Map;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.layer.util.LayerRandomnessSource;
 
-import net.fabricmc.fabric.api.biomes.v1.OverworldClimate;
+import net.fabricmc.fabric.api.biomes.v2.OverworldClimate;
 
 /**
  * Deals with picking variants for you.

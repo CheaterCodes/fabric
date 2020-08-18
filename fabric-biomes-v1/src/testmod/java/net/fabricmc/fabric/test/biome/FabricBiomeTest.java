@@ -24,8 +24,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.biomes.v1.NetherBiomes;
-import net.fabricmc.fabric.api.biomes.v1.OverworldBiomes;
+import net.fabricmc.fabric.api.biomes.v2.NetherBiomes;
+import net.fabricmc.fabric.api.biomes.v2.OverworldBiomes;
 
 public class FabricBiomeTest implements ModInitializer {
 	public static final String MOD_ID = "fabric-biome-api-v1-testmod";

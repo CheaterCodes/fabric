@@ -29,7 +29,7 @@ import net.minecraft.world.biome.layer.BiomeLayers;
 import net.minecraft.world.biome.layer.util.LayerRandomnessSource;
 import net.minecraft.world.biome.layer.util.LayerSampler;
 
-import net.fabricmc.fabric.api.biomes.v1.OverworldBiomes;
+import net.fabricmc.fabric.api.biomes.v2.OverworldBiomes;
 import net.fabricmc.fabric.impl.biome.InternalBiomeData;
 import net.fabricmc.fabric.impl.biome.WeightedBiomePicker;
 

@@ -34,7 +34,7 @@ import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.biome.layer.BiomeLayers;
 import net.minecraft.world.biome.source.VanillaLayeredBiomeSource;
 
-import net.fabricmc.fabric.api.biomes.v1.OverworldClimate;
+import net.fabricmc.fabric.api.biomes.v2.OverworldClimate;
 
 /**
  * Lists and maps for internal use only! Stores data that is used by the various mixins into the world generation
