@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.fabricmc.fabric.mixin.dynamicregistry",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "DynamicRegistryManagerMixin",
+    "DynamicRegistryManagerImplMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
