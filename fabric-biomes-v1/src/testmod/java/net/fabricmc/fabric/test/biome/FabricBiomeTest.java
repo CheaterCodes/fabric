@@ -51,7 +51,7 @@ public class FabricBiomeTest implements ModInitializer {
 		// Works fine
 		BiomeLoadingCallback.EVENT.register((biomeRegistryKey, biomeBuilder) -> {
 			if (biomeRegistryKey.equals(BuiltInBiomes.PLAINS)) {
-				biomeBuilder.structureFeature(() -> ConfiguredStructureFeatures.DESERT_PYRAMID);
+				biomeBuilder.structureFeature(ConfiguredStructureFeatures.DESERT_PYRAMID);
 			}
 		});
 	}

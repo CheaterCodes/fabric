@@ -23,6 +23,7 @@
   "mixins": [
     "fabric-biomes-v1.mixins.json"
   ],
+  "accessWidener": "fabric-biomes-api-v1.accesswidener",
   "entrypoints": {
     "main": [
       "net.fabricmc.fabric.impl.biome.FabricBiomesEntrypoint"

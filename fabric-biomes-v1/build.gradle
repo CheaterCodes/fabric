@@ -1,6 +1,10 @@
 archivesBaseName = "fabric-biomes-v1"
 version = getSubprojectVersion(project, "1.0.2")
 
+minecraft {
+	accessWidener = file("src/main/resources/fabric-biomes-api-v1.accesswidener")
+}
+
 dependencies {
 	compile project(path: ':fabric-api-base', configuration: 'dev')
 	compile project(path: ':fabric-registry-sync-v0', configuration: 'dev')

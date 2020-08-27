@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.fabricmc.fabric.api.biomes.v1;
 
 import java.util.List;
@@ -14,7 +30,9 @@ import net.minecraft.sound.BiomeAdditionsSound;
 import net.minecraft.sound.BiomeMoodSound;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
@@ -26,6 +44,8 @@ import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.carver.ConfiguredCarver;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.surfacebuilder.ConfiguredSurfaceBuilder;
 
 import net.fabricmc.fabric.mixin.biome.BiomeEffectsAccessor;
@@ -33,8 +53,9 @@ import net.fabricmc.fabric.mixin.biome.SpawnDensityAccessor;
 import net.fabricmc.fabric.mixin.biome.SpawnSettingsAccessor;
 
 public class FabricBiomeBuilder {
-	// DynamicRegistryManager
-	private DynamicRegistryManager registryManager;
+	private final DynamicRegistryManager registryManager;
+	private final MutableRegistry<ConfiguredFeature<?, ?>> configuredFeatureRegistry;
+	private final MutableRegistry<ConfiguredStructureFeature<?, ?>> configuredStructureFeaturesRegistry;
 
 	// Biome settings
 	private float depth;
@@ -73,6 +94,8 @@ public class FabricBiomeBuilder {
 
 	private FabricBiomeBuilder(DynamicRegistryManager registryManager) {
 		this.registryManager = registryManager;
+		this.configuredStructureFeaturesRegistry = registryManager.get(Registry.CONFIGURED_STRUCTURE_FEATURE_WORLDGEN);
+		this.configuredFeatureRegistry = registryManager.get(Registry.CONFIGURED_FEATURE_WORLDGEN);
 	}
 
 	public static FabricBiomeBuilder of(Biome biome, DynamicRegistryManager registryManager) {
@@ -83,8 +106,7 @@ public class FabricBiomeBuilder {
 		builder.downfall(biome.getDownfall());
 		builder.scale(biome.getScale());
 		builder.temperature(biome.getTemperature());
-		builder.temperatureModifier(Biome.TemperatureModifier.NONE);
-		//TODO: temperatureModifier
+		builder.temperatureModifier(biome.weather.temperatureModifier);
 
 		GenerationSettings generationSettings = biome.getGenerationSettings();
 
@@ -103,7 +125,7 @@ public class FabricBiomeBuilder {
 		}
 
 		for (Supplier<ConfiguredStructureFeature<?, ?>> structureFeature : generationSettings.getStructureFeatures()) {
-			builder.structureFeature(structureFeature);
+			builder.structureFeature(structureFeature.get());
 		}
 
 		builder.surfaceBuilder(generationSettings.getSurfaceBuilder());
@@ -207,81 +229,315 @@ public class FabricBiomeBuilder {
 		return biomeBuilder.build();
 	}
 
+	/**
+	 * @see Biome#getPrecipitation()
+	 */
+	public Biome.Precipitation getPrecipitation() {
+		return this.precipitation;
+	}
+
+	/**
+	 * @see Biome.Builder#precipitation(Biome.Precipitation)
+	 */
 	public FabricBiomeBuilder precipitation(Biome.Precipitation precipitation) {
 		this.precipitation = precipitation;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getCategory()
+	 */
+	public Biome.Category getCategory() {
+		return this.category;
+	}
+
+	/**
+	 * @see Biome.Builder#category(Biome.Category)
+	 */
 	public FabricBiomeBuilder category(Biome.Category category) {
 		this.category = category;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getDepth()
+	 */
+	public float getDepth() {
+		return this.depth;
+	}
+
+	/**
+	 * @see Biome.Builder#depth(float)
+	 */
 	public FabricBiomeBuilder depth(float depth) {
 		this.depth = depth;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getScale()
+	 */
+	public float getScale() {
+		return this.scale;
+	}
+
+	/**
+	 * @see Biome.Builder#scale(float)
+	 */
 	public FabricBiomeBuilder scale(float scale) {
 		this.scale = scale;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getTemperature()
+	 */
+	public float getTemperature() {
+		return this.temperature;
+	}
+
+	/**
+	 * @see Biome.Builder#temperature(float)
+	 */
 	public FabricBiomeBuilder temperature(float temperature) {
 		this.temperature = temperature;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getDownfall()
+	 */
+	public float getDownfall() {
+		return this.downfall;
+	}
+
+	/**
+	 * @see Biome.Builder#downfall(float)
+	 */
 	public FabricBiomeBuilder downfall(float downfall) {
 		this.downfall = downfall;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getTemperature(BlockPos)
+	 */
+	public Biome.TemperatureModifier getTemperatureModifier() {
+		return this.temperatureModifier;
+	}
+
+	/**
+	 * @see Biome.Builder#temperatureModifier(Biome.TemperatureModifier)
+	 */
 	public FabricBiomeBuilder temperatureModifier(Biome.TemperatureModifier temperatureModifier) {
 		this.temperatureModifier = temperatureModifier;
 		return this;
 	}
 
-	public FabricBiomeBuilder carver(GenerationStep.Carver step, Supplier<ConfiguredCarver<?>> carver) {
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#carver(GenerationStep.Carver, ConfiguredCarver)
+	 */
+	private FabricBiomeBuilder carver(GenerationStep.Carver step, Supplier<ConfiguredCarver<?>> carver) {
 		this.carvers.computeIfAbsent(step, (s) -> Lists.newArrayList()).add(carver);
 		return this;
 	}
 
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#carver(GenerationStep.Carver, ConfiguredCarver)
+	 */
 	public FabricBiomeBuilder carver(GenerationStep.Carver step, RegistryKey<ConfiguredCarver<?>> carver) {
 		carver(step, () -> registryManager.get(Registry.CONFIGURED_CARVER_WORLDGEN).get(carver));
 		return this;
 	}
 
-	public FabricBiomeBuilder feature(GenerationStep.Feature step, Supplier<ConfiguredFeature<?, ?>> feature) {
+	// TODO: Should this API allow removal of carvers?
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#feature(GenerationStep.Feature, ConfiguredFeature)
+	 */
+	private FabricBiomeBuilder feature(GenerationStep.Feature step, Supplier<ConfiguredFeature<?, ?>> feature) {
 		this.features.computeIfAbsent(step, (s) -> Lists.newArrayList()).add(feature);
 		return this;
 	}
 
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#feature(GenerationStep.Feature, ConfiguredFeature)
+	 */
 	public FabricBiomeBuilder feature(GenerationStep.Feature step, RegistryKey<ConfiguredFeature<?, ?>> feature) {
 		feature(step, () -> registryManager.get(Registry.CONFIGURED_FEATURE_WORLDGEN).get(feature));
 		return this;
 	}
 
-	public FabricBiomeBuilder structureFeature(Supplier<ConfiguredStructureFeature<?, ?>> structureFeature) {
-		this.structureFeatures.add(structureFeature);
-		return this;
+	// TODO: Should this API allow removal of features?
+
+	/**
+	 * Checks whether this builder contains a given feature (in any configuration) in any generation step.
+	 *
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getFeatures()
+	 */
+	public boolean hasFeature(Feature<?> feature) {
+		for (List<Supplier<ConfiguredFeature<?, ?>>> featureList : features.values()) {
+			for (Supplier<ConfiguredFeature<?, ?>> supplier : featureList) {
+				if (supplier.get().feature == feature) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
+	/**
+	 * Checks whether this builder contains a given feature (in any configuration) in the given
+	 * generation step.
+	 *
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getFeatures()
+	 */
+	public boolean hasFeature(GenerationStep.Feature step, Feature<?> feature) {
+		List<Supplier<ConfiguredFeature<?, ?>>> featureList = features.get(step);
+
+		if (featureList != null) {
+			for (Supplier<ConfiguredFeature<?, ?>> supplier : featureList) {
+				if (supplier.get().feature == feature) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks whether this builder contains a given configured feature in any generation step.
+	 *
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getFeatures()
+	 */
+	public boolean hasConfiguredFeature(RegistryKey<ConfiguredFeature<?, ?>> configuredFeatureKey) {
+		ConfiguredFeature<?, ?> configuredFeature = registryManager.get(Registry.CONFIGURED_FEATURE_WORLDGEN)
+				.get(configuredFeatureKey);
+		if (configuredFeature == null) {
+			return false;
+		}
+
+		for (List<Supplier<ConfiguredFeature<?, ?>>> featureList : features.values()) {
+			for (Supplier<ConfiguredFeature<?, ?>> supplier : featureList) {
+				if (supplier.get() == configuredFeature) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks whether this builder contains a given configured feature in a specific generation step.
+	 *
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getFeatures()
+	 */
+	public boolean hasConfiguredFeature(GenerationStep.Feature step, RegistryKey<ConfiguredFeature<?, ?>> configuredFeatureKey) {
+		ConfiguredFeature<?, ?> configuredFeature = registryManager.get(Registry.CONFIGURED_FEATURE_WORLDGEN)
+				.get(configuredFeatureKey);
+		if (configuredFeature == null) {
+			return false;
+		}
+
+		List<Supplier<ConfiguredFeature<?, ?>>> featureList = features.get(step);
+
+		if (featureList != null) {
+			for (Supplier<ConfiguredFeature<?, ?>> supplier : featureList) {
+				if (supplier.get() == configuredFeature) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#structureFeature(ConfiguredStructureFeature)
+	 */
+	public FabricBiomeBuilder structureFeature(ConfiguredStructureFeature<?, ?> structureFeature) {
+		RegistryKey<ConfiguredStructureFeature<?, ?>> key = this.configuredStructureFeaturesRegistry.getKey(structureFeature)
+				.orElseThrow(() -> new IllegalArgumentException("The given structure feature is not registered."));
+		return structureFeature(key);
+	}
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#structureFeature(ConfiguredStructureFeature)
+	 */
 	public FabricBiomeBuilder structureFeature(RegistryKey<ConfiguredStructureFeature<?, ?>> structureFeature) {
-		structureFeature(() -> registryManager.get(Registry.CONFIGURED_STRUCTURE_FEATURE_WORLDGEN).get(structureFeature));
+		this.structureFeatures.add(() -> configuredStructureFeaturesRegistry.get(structureFeature));
 		return this;
 	}
 
-	public FabricBiomeBuilder surfaceBuilder(Supplier<ConfiguredSurfaceBuilder<?>> surfaceBuilder) {
+	// TODO: Should this API allow removal of structures?
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#hasStructureFeature(StructureFeature)
+	 */
+	public boolean hasStructureFeature(StructureFeature<?> feature) {
+		return this.structureFeatures.stream().anyMatch(s -> s.get().feature == feature);
+	}
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings.Builder#surfaceBuilder(ConfiguredSurfaceBuilder)
+	 */
+	private FabricBiomeBuilder surfaceBuilder(Supplier<ConfiguredSurfaceBuilder<?>> surfaceBuilder) {
 		this.surfaceBuilder = surfaceBuilder;
 		return this;
 	}
 
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getSurfaceBuilder()
+	 */
 	public FabricBiomeBuilder surfaceBuilder(RegistryKey<ConfiguredSurfaceBuilder<?>> surfaceBuilder) {
 		surfaceBuilder(() -> registryManager.get(Registry.CONFIGURED_SURFACE_BUILDER_WORLDGEN).get(surfaceBuilder));
 		return this;
 	}
 
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getSurfaceBuilder()
+	 */
+	public Supplier<ConfiguredSurfaceBuilder<?>> getSurfaceBuilder() {
+		return surfaceBuilder;
+	}
+
+	/**
+	 * @see Biome#getGenerationSettings()
+	 * @see GenerationSettings#getSurfaceBuilder()
+	 */
+	public Optional<RegistryKey<ConfiguredSurfaceBuilder<?>>> getSurfaceBuilderKey() {
+		return registryManager.get(Registry.CONFIGURED_SURFACE_BUILDER_WORLDGEN).getKey(surfaceBuilder.get());
+	}
+
+	/**
+	 * @see Biome#getSpawnSettings()
+	 * @see SpawnSettings#isPlayerSpawnFriendly()
+	 */
+	public boolean isPlayerSpawnFriendly() {
+		return this.playerSpawnFriendly;
+	}
+
+	/**
+	 * @see Biome#getSpawnSettings()
+	 * @see SpawnSettings.Builder#playerSpawnFriendly()
+	 */
 	public FabricBiomeBuilder playerSpawnFriendly() {
 		this.playerSpawnFriendly = true;
 		return this;
@@ -292,19 +548,31 @@ public class FabricBiomeBuilder {
 		return this;
 	}
 
+	public float getCreatureSpawnProbability() {
+		return creatureSpawnProbability;
+	}
+
 	public FabricBiomeBuilder creatureSpawnProbability(float probability) {
 		this.creatureSpawnProbability = probability;
 		return this;
 	}
+
+	// TODO Has Spawn / Get Spawners
 
 	public FabricBiomeBuilder spawn(SpawnGroup spawnGroup, SpawnSettings.SpawnEntry spawnEntry) {
 		this.spawners.computeIfAbsent(spawnGroup, (s) -> Lists.newArrayList()).add(spawnEntry);
 		return this;
 	}
 
+	// TODO Has Spawn / Get Spawners
+
 	public FabricBiomeBuilder spawnDensity(EntityType<?> entityType, double mass, double maxDensity) {
 		this.spawnDensities.put(entityType, SpawnDensityAccessor.create(maxDensity, mass));
 		return this;
+	}
+
+	public int getFogColor() {
+		return this.fogColor;
 	}
 
 	public FabricBiomeBuilder fogColor(int fogColor) {
@@ -312,9 +580,17 @@ public class FabricBiomeBuilder {
 		return this;
 	}
 
+	public int getWaterColor() {
+		return this.waterColor;
+	}
+
 	public FabricBiomeBuilder waterColor(int waterColor) {
 		this.waterColor = waterColor;
 		return this;
+	}
+
+	public int getWaterFogColor() {
+		return waterFogColor;
 	}
 
 	public FabricBiomeBuilder waterFogColor(int waterFogColor) {
@@ -322,18 +598,35 @@ public class FabricBiomeBuilder {
 		return this;
 	}
 
+	public int getSkyColor() {
+		return skyColor;
+	}
+
 	public FabricBiomeBuilder skyColor(int skyColor) {
 		this.skyColor = skyColor;
 		return this;
 	}
 
+	public Optional<Integer> getFoliageColor() {
+		return foliageColor;
+	}
+
 	public FabricBiomeBuilder foliageColor(int foliageColor) {
-		this.foliageColor = Optional.of(foliageColor);
+		return foliageColor(Optional.of(foliageColor));
+	}
+
+	public FabricBiomeBuilder foliageColor(Optional<Integer> foliageColor) {
+		this.foliageColor = foliageColor;
 		return this;
 	}
 
 	public FabricBiomeBuilder grassColor(int grassColor) {
 		this.grassColor = Optional.of(grassColor);
+		return this;
+	}
+
+	public FabricBiomeBuilder clearGrassColor() {
+		this.grassColor = Optional.empty();
 		return this;
 	}
 
@@ -347,8 +640,18 @@ public class FabricBiomeBuilder {
 		return this;
 	}
 
+	public FabricBiomeBuilder clearParticleConfig() {
+		this.particleConfig = Optional.empty();
+		return this;
+	}
+
 	public FabricBiomeBuilder loopSound(SoundEvent sound) {
 		this.loopSound = Optional.of(sound);
+		return this;
+	}
+
+	public FabricBiomeBuilder clearLoopSound() {
+		this.loopSound = Optional.empty();
 		return this;
 	}
 
@@ -357,13 +660,28 @@ public class FabricBiomeBuilder {
 		return this;
 	}
 
+	public FabricBiomeBuilder clearMoodSound(BiomeMoodSound moodSound) {
+		this.moodSound = Optional.empty();
+		return this;
+	}
+
 	public FabricBiomeBuilder additionsSound(BiomeAdditionsSound additionsSound) {
 		this.additionsSound = Optional.of(additionsSound);
 		return this;
 	}
 
+	public FabricBiomeBuilder clearAdditionsSound() {
+		this.additionsSound = Optional.empty();
+		return this;
+	}
+
 	public FabricBiomeBuilder music(MusicSound music) {
 		this.musicSound = Optional.of(music);
+		return this;
+	}
+
+	public FabricBiomeBuilder clearMusic() {
+		this.musicSound = Optional.empty();
 		return this;
 	}
 }
